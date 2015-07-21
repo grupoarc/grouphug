@@ -31,6 +31,6 @@ setup(
         keywords = 'social',
         packages = find_packages(),
         #package_data = { '': spt_files('pywebscript') },
-        install_requires = [ 'Flask' ]
+        install_requires = [ 'Flask', 'gunicorn' ]
 )
 
