@@ -1,0 +1,17 @@
+*.egg-info/
+aspen/tests/log
+env
+*.pyc
+distribute-*
+__pycache__
+*\$py.class
+.tox
+/build/
+/docs/_build/
+/downloads/
+.coverage
+/.deps
+/dist/
+local.env
+/htmlcov/
+.ropeproject
