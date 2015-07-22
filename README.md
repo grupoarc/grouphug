@@ -1,3 +1,3 @@
 
-# Nothing to see here, move along now.
+# Decentralized activity streams and more.
 
