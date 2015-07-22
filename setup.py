@@ -30,7 +30,7 @@ setup(
         ],
         keywords = 'social',
         packages = find_packages(),
-        #package_data = { '': spt_files('pywebscript') },
+        package_data = { 'grouphug': [ 'templates/*.html' ] },
         install_requires = [ 'Flask', 'gunicorn' ]
 )
 
