@@ -1,5 +1,5 @@
 
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from flask import Flask, abort, request, render_template, jsonify
 
 app = Flask(__name__)
@@ -19,27 +19,42 @@ class User(object):
     props = {}
     links = set()
 
-    def aka(self, name):
-        """return True iff name is a valid alias of this user"""
-        return name in self.aliases
-
     def setprop(self, k, v):
         self.props[k] = v
 
-    def setlink(self, link):
+    def addlink(self, link):
         self.links.add(link)
 
-    def setalias(self, alias):
+    def addalias(self, alias):
         self.aliases.add(alias)
 
-def links_as_json(links):
-    result = []
-    for link in links:
-        l = { 'rel': link.rel }
-        if link.type: l['type'] = link.type
-        if link.href: l['href'] = link.href
-        result.append(l)
-    return result
+    def webfinger(self, resource, rels=None):
+        """return a json-able structure that's the result
+        of a webfinger request for this user using the
+        specifed resource and list of rels, or return None
+        if the resource isn't found
+        """
+        if not (resource in self.aliases or resource == self.subject):
+            return None
+
+        results = {
+            'subject': self.subject,
+            'aliases': list(self.aliases),
+            'properties': self.props,
+        }
+
+        links = self.links
+        if rels: del results['properties']
+
+        # turn links into something more jsonish
+        results['links'] = []
+        for l in links:
+            if rels and not l.rel in rels: continue
+            link = { 'rel': l.rel }
+            if l.type: link['type'] = l.type
+            if l.href: link['href'] = l.href
+            results['links'].append(link)
+        return results
 
 user = User()
 
@@ -76,11 +91,11 @@ def userpage():
         # put data into the user
         user.subject = subject
         for row in aliases:
-            user.setalias(*row)
+            user.addalias(*row)
         for row in props:
             user.setprop(*row)
         for row in links:
-            user.setlink(Link(*row))
+            user.addlink(Link(*row))
 
     return render_template('user.html', user=user)
 
@@ -90,20 +105,10 @@ def userpage():
 def webfinger():
     global user
     resource = request.args.get('resource')
-    if not user.aka(resource):
+    rels = request.args.getlist('rel')
+    result = user.webfinger(resource, rels)
+    if result is None:
         abort(404)
-    rel = request.args.getlist('rel')
+    return jsonify(**result)
 
-    results = {
-        'subject': user.subject,
-        'aliases': list(user.aliases),
-    }
-    if not rel:
-        results['properties'] = user.props
-        links = user.links
-    else:
-        links = [ l for l in user.links if l.rel in rel ]
-    results['links'] = links_as_json(links)
-
-    return jsonify(**results)
 
