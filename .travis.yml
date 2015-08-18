@@ -5,6 +5,7 @@ branches:
 language: python
 python:
   - 3.4
+services: redis
 before_install:
   - pip install --upgrade pip
   - pip --version

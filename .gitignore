@@ -16,3 +16,4 @@ local.env
 /htmlcov/
 .ropeproject
 /.pytest
+/.env

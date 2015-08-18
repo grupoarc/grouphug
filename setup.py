@@ -3,11 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
         name='grouphug',
-
-        # Versions should comply with PEP440.  For a discussion on single-sourcing
-        # the version across setup.py and the project code, see
-        # https://packaging.python.org/en/latest/single_source_version.html
-        version='0.1',
+        version='0.2',
 
         description='Distributed Collaboration',
         long_description='Distributed Collaboration via Open Standard',
@@ -31,6 +27,6 @@ setup(
         keywords = 'social',
         packages = find_packages(),
         package_data = { 'grouphug': [ 'templates/*.html' ] },
-        install_requires = [ 'Flask', 'gunicorn' ]
+        install_requires = [ 'Flask', 'gunicorn', 'redis', 'hiredis' ]
 )
 

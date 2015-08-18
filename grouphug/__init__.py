@@ -1,23 +1,63 @@
 
+import sys
+import json
 from collections import namedtuple
 from flask import Flask, abort, request, render_template, jsonify
 
-app = Flask(__name__)
-app.debug = True
-app.jinja_env.trim_blocks = True
-app.jinja_env.lstrip_blocks = True
+def redisdb():
+    import os
+    import redis
+    from urllib.parse import urlparse
 
-@app.route('/')
-def home():
-    return render_template('home.html')
+    DEFAULT_URL = "redis://redisuser@localhost:6379/"
+    uri = urlparse(os.environ.get('REDISCLOUD_URL', DEFAULT_URL))
+    return redis.StrictRedis(host=uri.hostname, port=uri.port, password=uri.password, decode_responses=True)
+
+DB = redisdb()
 
 Link = namedtuple('Link', 'rel, type, href')
+
+def link_to_json(link):
+    return json.dumps(dict(link._asdict()))
+
+def link_from_json(j):
+    return Link(**json.loads(j))
 
 class User(object):
     subject = None
     aliases = set()
     props = {}
     links = set()
+
+    @classmethod
+    def load(cls):
+        user = User()
+        user.subject = DB.get('USER_SUBJECT')
+        user.aliases = DB.smembers('USER_ALIASES')
+        user.props = DB.hgetall('USER_PROPS')
+        user.links = { link_from_json(j) for j in DB.smembers('USER_LINKS') }
+        return user
+
+    def save(self):
+        def setset(db, key, *vals):
+            db.delete(key)
+            db.sadd(key, *vals)
+
+        if not self.subject: return
+        cmds = DB.pipeline()
+
+        cmds.set('USER_SUBJECT', self.subject)
+        if self.aliases:
+            setset(cmds, 'USER_ALIASES', *self.aliases)
+        if self.props:
+            cmds.hmset('USER_PROPS', self.props)
+        if self.links:
+            setset(cmds, 'USER_LINKS', *(link_to_json(l) for l in self.links))
+
+        results = cmds.execute()
+        for result in results:
+            if not result:
+                sys.stderr.write("something bad! %r" % cmds)
 
     def setprop(self, k, v):
         self.props[k] = v
@@ -26,6 +66,8 @@ class User(object):
         self.links.add(link)
 
     def addalias(self, alias):
+        if not self.subject:
+            self.subject = alias
         self.aliases.add(alias)
 
     def webfinger(self, resource, rels=None):
@@ -56,7 +98,19 @@ class User(object):
             results['links'].append(link)
         return results
 
-user = User()
+
+
+user = User.load()
+
+app = Flask(__name__)
+app.debug = True
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
 
 def _extract_rows(form, name, cols):
     """pull out a row formdata
@@ -96,6 +150,7 @@ def userpage():
             user.setprop(*row)
         for row in links:
             user.addlink(Link(*row))
+        user.save()
 
     return render_template('user.html', user=user)
 
