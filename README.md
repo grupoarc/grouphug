@@ -1,3 +1,1 @@
-
-# Decentralized activity streams and more.
-
+GroupHug - a collaboration space
