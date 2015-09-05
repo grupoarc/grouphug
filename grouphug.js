@@ -1,23 +1,50 @@
-if (Meteor.isClient) {
-  // counter starts at 0
-  Session.setDefault('counter', 0);
 
-  Template.hello.helpers({
-    counter: function () {
-      return Session.get('counter');
+// routing
+
+Router.route('/register');
+Router.route('/login');
+Router.route('/', { 
+	template: 'root',
+	name: 'root'
+});
+Router.route('/page');
+Router.route('/page/:pageName', {
+    template: 'showPage',
+    data: function() {
+        var curPage = this.params.pageName;
+        return Pages.findOne({ name: curPage });
     }
-  });
+});
+Router.configure({ layoutTemplate: 'main'
+});
 
-  Template.hello.events({
-    'click button': function () {
-      // increment the counter when button is clicked
-      Session.set('counter', Session.get('counter') + 1);
+Pages = new Mongo.Collection('pages');
+
+if (Meteor.isClient) {  // Client-only code below here
+
+Template.addPage.events({
+    'click .savePage': function(event) {
+        event.preventDefault();
+        var pageName = $('[name=pageName]').val();
+        var pageText = $('[name=pageText]').val();
+        Pages.insert({
+            name: pageName,
+            text: pageText,
+            created: Date()
+        });
+        $('[name=pageName]').val('');
     }
-  });
-}
+});
 
-if (Meteor.isServer) {
-  Meteor.startup(function () {
-    // code to run on server at startup
-  });
+
+Template.page.helpers({
+    'page': function() {
+        return Pages.find({}, {sort: {name: 1}});
+    }
+});
+
+Template.addPage.helpers({
+    'DEFAULT_PAGE_CONTENT' : "Page content goes here"
+});
+
 }

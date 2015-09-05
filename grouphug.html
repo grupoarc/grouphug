@@ -2,13 +2,67 @@
   <title>grouphug</title>
 </head>
 
-<body>
-  <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
-</body>
-
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+<template name="main">
+  {{> navbar}}
+  {{> yield}}
+  <hr />
 </template>
+
+<template name="actions">
+  Actions: 
+    <a href="/edit/{{name}}">Edit</a> - 
+    <a href="/history/{{name}}">View History</a>
+</template>
+
+<template name="navbar">
+  <p>
+  <a href="{{pathFor route="root"}}">GroupHug</a> -
+  <a href="{{pathFor route="page"}}">Page List</a> -
+  <a href="{{pathFor route="register"}}">Register</a> -
+  <a href="{{pathFor route="login"}}">Login</a>
+  </p>
+</template>
+
+<template name="root">
+  <h1>Welcome to GroupHug</h1>
+</template>
+
+<template name="register">
+  <h2>Register</h2>
+  <form class="register">
+    <p>Email: <input type="email" name="email"></p>
+    <p>Password: <input type="password" name="password"></p>
+    <p><input type="submit" value="Register"></p>
+  </form> 
+</template>
+
+<template name="login">
+  <h2>Login</h2>
+</template>
+
+<template name="addPage">
+  <form>Add a page:
+    <input type="text" placeholder="Page name" name="pageName">
+    <br/>
+    <br/>
+    <textarea name="pageText">{{DEFAULT_PAGE_CONTENT}}</textarea>
+    <br/>
+  </form>
+  <button class="savePage">Save</button>
+</template>
+
+<template name="page">
+  <h2>Pages:</h2>
+  <ul>
+    {{#each page}}
+      <li><a href="/page/{{name}}">{{name}}</a></li>
+    {{/each}}
+  </ul>     
+  {{> addPage}}
+</template>
+
+<template name="showPage">
+  <h2>{{name}}</h2>
+  {{text}}
+</template>
+
