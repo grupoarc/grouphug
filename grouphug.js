@@ -27,15 +27,17 @@ Template.addPage.events({
         event.preventDefault();
         var pageName = $('[name=pageName]').val();
         var pageText = $('[name=pageText]').val();
+        var currentUser = Meteor.userId();
+	if (!currentUser) return;
         Pages.insert({
             name: pageName,
             text: pageText,
-            created: Date()
+            created: Date(),
+            creator: currentUser
         });
         $('[name=pageName]').val('');
     }
 });
-
 
 Template.page.helpers({
     'page': function() {
@@ -46,5 +48,50 @@ Template.page.helpers({
 Template.addPage.helpers({
     'DEFAULT_PAGE_CONTENT' : "Page content goes here"
 });
+
+Template.register.events({
+    'submit form': function(event){
+        event.preventDefault();
+        var email = $('[name=email]').val();
+        var password = $('[name=password]').val();
+        Accounts.createUser({
+            email: email,
+            password: password
+        }, function(error) {
+            if (error) {
+                console.log(error.reason)
+            } else { 
+                Router.go('root');
+            }
+	    });
+	console.log("Registerd as " + email)
+        Router.go('root');
+    }
+});
+
+Template.login.events({
+    'submit form': function(event){
+        event.preventDefault();
+        var email = $('[name=email]').val();
+        var password = $('[name=password]').val();
+        Meteor.loginWithPassword(email, password, function(error) {
+            if (error) {
+                console.log(error.reason)
+            } else { 
+                Router.go('root');
+            }
+	    });
+    }
+});
+
+Template.navbar.events({
+    'click .logout': function(event) {
+        event.preventDefault();
+        Meteor.logout();
+        Router.go('login');
+    }
+});
+
+
 
 }
