@@ -1,11 +1,10 @@
 
 // routing
-
 Router.route('/register');
 Router.route('/login');
 Router.route('/', { 
-	template: 'root',
-	name: 'root'
+        template: 'root',
+        name: 'root'
 });
 Router.route('/page');
 Router.route('/page/:pageName', {
@@ -18,22 +17,27 @@ Router.route('/page/:pageName', {
 Router.configure({ layoutTemplate: 'main'
 });
 
+
 Pages = new Mongo.Collection('pages');
 
 if (Meteor.isClient) {  // Client-only code below here
+
+Accounts.ui.config({
+    passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL"
+});
 
 Template.addPage.events({
     'click .savePage': function(event) {
         event.preventDefault();
         var pageName = $('[name=pageName]').val();
         var pageText = $('[name=pageText]').val();
-        var currentUser = Meteor.userId();
-	if (!currentUser) return;
+        var currentUserId = Meteor.userId();
+        if (!currentUserId) return;
         Pages.insert({
             name: pageName,
             text: pageText,
             created: Date(),
-            creator: currentUser
+            creator: currentUserId
         });
         $('[name=pageName]').val('');
     }
@@ -63,8 +67,8 @@ Template.register.events({
             } else { 
                 Router.go('root');
             }
-	    });
-	console.log("Registerd as " + email)
+            });
+        console.log("Registerd as " + email)
         Router.go('root');
     }
 });
@@ -80,7 +84,7 @@ Template.login.events({
             } else { 
                 Router.go('root');
             }
-	    });
+            });
     }
 });
 
