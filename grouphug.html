@@ -17,7 +17,7 @@
 <template name="navbar">
   <p>
   <a href="{{pathFor route="root"}}">GroupHug</a> -
-  <a href="{{pathFor route="page"}}">Page List</a> -
+  <a href="{{pathFor route="room"}}">Room List</a> -
   {{> loginButtons}}
   </p>
 </template>
@@ -44,30 +44,30 @@
   </form>
 </template>
 
-<template name="addPage">
-  <form>Add a page:
-    <input type="text" placeholder="Page name" name="pageName">
+<template name="addRoom">
+  <form>Add a room:
+    <input type="text" placeholder="Room name" name="roomName">
     <br/>
     <br/>
-    <textarea name="pageText">{{DEFAULT_PAGE_CONTENT}}</textarea>
+    <textarea name="roomText">{{DEFAULT_PAGE_CONTENT}}</textarea>
     <br/>
   </form>
-  <button class="savePage">Save</button>
+  <button class="saveRoom">Save</button>
 </template>
 
-<template name="page">
-  <h2>Pages:</h2>
+<template name="room">
+  <h2>Rooms:</h2>
   <ul>
-    {{#each page}}
-      <li><a href="/page/{{name}}">{{name}}</a></li>
+    {{#each room}}
+      <li><a href="/room/{{name}}">{{name}}</a></li>
     {{/each}}
   </ul>
   {{#if currentUser}}     
-    {{> addPage}}
+    {{> addRoom}}
   {{/if}}
 </template>
 
-<template name="showPage">
+<template name="showRoom">
   <h2>{{name}}</h2>
   {{text}}
 </template>

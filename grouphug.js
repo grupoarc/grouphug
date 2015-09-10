@@ -6,19 +6,19 @@ Router.route('/', {
         template: 'root',
         name: 'root'
 });
-Router.route('/page');
-Router.route('/page/:pageName', {
-    template: 'showPage',
+Router.route('/room');
+Router.route('/room/:roomName', {
+    template: 'showRoom',
     data: function() {
-        var curPage = this.params.pageName;
-        return Pages.findOne({ name: curPage });
+        var curRoom = this.params.roomName;
+        return Rooms.findOne({ name: curRoom });
     }
 });
 Router.configure({ layoutTemplate: 'main'
 });
 
 
-Pages = new Mongo.Collection('pages');
+Rooms = new Mongo.Collection('rooms');
 
 if (Meteor.isClient) {  // Client-only code below here
 
@@ -26,31 +26,31 @@ Accounts.ui.config({
     passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL"
 });
 
-Template.addPage.events({
-    'click .savePage': function(event) {
+Template.addRoom.events({
+    'click .saveRoom': function(event) {
         event.preventDefault();
-        var pageName = $('[name=pageName]').val();
-        var pageText = $('[name=pageText]').val();
+        var roomName = $('[name=roomName]').val();
+        var roomText = $('[name=roomText]').val();
         var currentUserId = Meteor.userId();
         if (!currentUserId) return;
-        Pages.insert({
-            name: pageName,
-            text: pageText,
+        Rooms.insert({
+            name: roomName,
+            text: roomText,
             created: Date(),
             creator: currentUserId
         });
-        $('[name=pageName]').val('');
+        $('[name=roomName]').val('');
     }
 });
 
-Template.page.helpers({
-    'page': function() {
-        return Pages.find({}, {sort: {name: 1}});
+Template.room.helpers({
+    'room': function() {
+        return Rooms.find({}, {sort: {name: 1}});
     }
 });
 
-Template.addPage.helpers({
-    'DEFAULT_PAGE_CONTENT' : "Page content goes here"
+Template.addRoom.helpers({
+    'DEFAULT_PAGE_CONTENT' : "Room content goes here"
 });
 
 Template.register.events({
