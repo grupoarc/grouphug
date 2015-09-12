@@ -8,16 +8,10 @@
   <hr />
 </template>
 
-<template name="actions">
-  Actions: 
-    <a href="/edit/{{name}}">Edit</a> - 
-    <a href="/history/{{name}}">View History</a>
-</template>
-
 <template name="navbar">
   <p>
   <a href="{{pathFor route="root"}}">GroupHug</a> -
-  <a href="{{pathFor route="room"}}">Room List</a> -
+  <a href="{{pathFor route="roomList"}}">Room List</a> -
   {{> loginButtons}}
   </p>
 </template>
@@ -44,30 +38,31 @@
   </form>
 </template>
 
-<template name="addRoom">
-  <form>Add a room:
-    <input type="text" placeholder="Room name" name="roomName">
-    <br/>
-    <br/>
-    <textarea name="roomText">{{DEFAULT_PAGE_CONTENT}}</textarea>
-    <br/>
-  </form>
-  <button class="saveRoom">Save</button>
-</template>
-
-<template name="room">
-  <h2>Rooms:</h2>
-  <ul>
-    {{#each room}}
-      <li><a href="/room/{{name}}">{{name}}</a></li>
-    {{/each}}
-  </ul>
+<template name="roomEditor">
   {{#if currentUser}}     
-    {{> addRoom}}
+    <form>
+      <textarea name="roomText" rows="25" cols="80">{{text}}</textarea>
+    </form>
+    <button class="saveRoom">Save</button>
+  {{else}}
+    You must be logged in to edit a page.
   {{/if}}
 </template>
 
+<template name="roomList">
+  <h2>Rooms:</h2>
+  <ul>
+    {{#each rooms}}
+      <li><a href="/room/{{name}}">{{name}}</a></li>
+    {{/each}}
+  </ul>
+</template>
+
 <template name="showRoom">
+  <p>
+  <a href="?view=editor">Edit</a> -
+  <a href="?view=history">History</a>
+  </p>
   <h2>{{name}}</h2>
   {{text}}
 </template>

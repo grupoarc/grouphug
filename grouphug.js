@@ -6,19 +6,86 @@ Router.route('/', {
         template: 'root',
         name: 'root'
 });
-Router.route('/room');
-Router.route('/room/:roomName', {
-    template: 'showRoom',
-    data: function() {
-        var curRoom = this.params.roomName;
-        return Rooms.findOne({ name: curRoom });
+Router.route('/room', { 
+        template: 'roomList',
+        name: 'roomList' 
+});
+Router.route('/rooms', function() { 
+        this.redirect('roomList')
+});
+Router.route('/room/:roomName', function () {
+    var curRoom = this.params.roomName;
+    var room = Rooms.findOne({ name: curRoom });
+    //console.log("Raw room returned " + room);
+    if (!room) {
+        room = Rooms.findOne({ name: "__empty_room__" });
+        if (!room) {
+            console.log("Database not initialized! No __empty_room__ found!");
+        }
+        room.name = curRoom;
     }
+
+    var renderData = {
+        data: function() {
+           return room;
+        }
+    };
+
+    if (this.params.query.view === 'editor') {
+        console.log("editing room");
+        this.render('roomEditor', renderData);
+    } else {
+        console.log("showing room");
+        this.render('showRoom', renderData);
+    }
+}, {
+        name: 'room'
 });
-Router.configure({ layoutTemplate: 'main'
+Router.configure({ 
+        layoutTemplate: 'main'
 });
 
-
+// create/prepopulate (if necessary) room collection
 Rooms = new Mongo.Collection('rooms');
+RoomHistory = new Mongo.Collection('room_history');
+
+var roomUpdate = function (room) {
+    var oldRoom = Rooms.findOne({ name: room.name });
+    if (oldRoom) {
+        room.room_id = oldRoom.room_id || oldRoom._id;
+        Rooms.update({ _id: oldRoom._id }, room, {upsert: true});
+    } else {
+        Rooms.insert(room)
+    }
+    RoomHistory.insert(room);
+}
+if (Meteor.isServer) { // Server-only code below here
+
+if (typeof Rooms.findOne({ name: "__empty_room__" }) === "undefined") {
+    var newRoom = {
+        name: "__empty_room__",
+        text: 'There is no room here.  You should <a href="?view=edit">create</a> one.',
+        created: Date(),
+        author: null
+    }
+    roomUpdate(newRoom);
+}
+
+} // end server-only code
+
+// whether a given username is an admin or not
+var isAdmin = function (username) {
+    var adminRoom = Rooms.findOne({ name: "__admin__" });
+    if (typeof adminRoom === 'undefined') { // room not found
+        return true;
+    }
+    // make a trim'd list of usernames in the room
+    var adminList = adminRoom.text.split('\n').map(function(s) { return s.trim() }).filter(function(s) { return s != '' });
+    if (adminList.length === 0 || adminList.indexOf(username) > -1) {
+        return true;
+    }
+    return false;
+}
 
 if (Meteor.isClient) {  // Client-only code below here
 
@@ -26,31 +93,30 @@ Accounts.ui.config({
     passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL"
 });
 
-Template.addRoom.events({
+Template.roomEditor.events({
     'click .saveRoom': function(event) {
         event.preventDefault();
-        var roomName = $('[name=roomName]').val();
+        var roomName = this.name;
         var roomText = $('[name=roomText]').val();
         var currentUserId = Meteor.userId();
-        if (!currentUserId) return;
-        Rooms.insert({
+        if ((!currentUserId) ||
+            (roomName.startsWith('__') && !isAdmin(currentUserId.username))) {
+            return; // E_PERM
+        }
+        roomUpdate({
             name: roomName,
             text: roomText,
             created: Date(),
-            creator: currentUserId
+            author: currentUserId
         });
-        $('[name=roomName]').val('');
+        Router.go('room', { roomName: roomName });
     }
 });
 
-Template.room.helpers({
-    'room': function() {
+Template.roomList.helpers({
+    'rooms': function() {
         return Rooms.find({}, {sort: {name: 1}});
     }
-});
-
-Template.addRoom.helpers({
-    'DEFAULT_PAGE_CONTENT' : "Room content goes here"
 });
 
 Template.register.events({
