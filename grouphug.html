@@ -38,17 +38,6 @@
   </form>
 </template>
 
-<template name="roomEditor">
-  {{#if currentUser}}     
-    <form>
-      <textarea name="roomText" rows="25" cols="80">{{text}}</textarea>
-    </form>
-    <button class="saveRoom">Save</button>
-  {{else}}
-    You must be logged in to edit a page.
-  {{/if}}
-</template>
-
 <template name="roomList">
   <h2>Rooms:</h2>
   <ul>
@@ -58,12 +47,40 @@
   </ul>
 </template>
 
-<template name="showRoom">
+<template name="actions">
   <p>
-  <a href="?view=editor">Edit</a> -
-  <a href="?view=history">History</a>
+  <a href="{{pathFor route="room" roomName=this.name}}">View</a> -
+  <a href="{{pathFor route="room" roomName=this.name}}?view=editor">Edit</a> -
+  <a href="{{pathFor route="room" roomName=this.name}}?view=history">History</a>
   </p>
+</template>
+
+<template name="showRoom">
+  {{> actions}}
   <h2>{{name}}</h2>
   {{text}}
+</template>
+
+<template name="roomEditor">
+  {{#if currentUser}}     
+  {{> actions}}
+  <h2>Edit {{name}}:</h2>
+    <form>
+      <textarea name="roomText" rows="25" cols="80">{{text}}</textarea>
+    </form>
+    <button class="saveRoom">Save</button>
+  {{else}}
+    You must be logged in to edit a page.
+  {{/if}}
+</template>
+
+<template name="roomHistory">
+  {{> actions}}
+  <h2>History of {{name}}:</h2>
+  <ul>
+    {{#each versions}}
+      <li>{{created}} by {{author.username}}</li>
+    {{/each}}
+  </ul>
 </template>
 

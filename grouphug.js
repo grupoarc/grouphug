@@ -1,5 +1,8 @@
 
 // routing
+Router.configure({ 
+        layoutTemplate: 'main'
+});
 Router.route('/register');
 Router.route('/login');
 Router.route('/', { 
@@ -21,8 +24,9 @@ Router.route('/room/:roomName', function () {
         room = Rooms.findOne({ name: "__empty_room__" });
         if (!room) {
             console.log("Database not initialized! No __empty_room__ found!");
-        }
-        room.name = curRoom;
+        } else {
+            room.name = curRoom;
+	}
     }
 
     var renderData = {
@@ -32,17 +36,14 @@ Router.route('/room/:roomName', function () {
     };
 
     if (this.params.query.view === 'editor') {
-        console.log("editing room");
         this.render('roomEditor', renderData);
+    } else if (this.params.query.view === 'history') {
+        this.render('roomHistory', renderData);
     } else {
-        console.log("showing room");
         this.render('showRoom', renderData);
     }
 }, {
         name: 'room'
-});
-Router.configure({ 
-        layoutTemplate: 'main'
 });
 
 // create/prepopulate (if necessary) room collection
@@ -118,6 +119,32 @@ Template.roomList.helpers({
         return Rooms.find({}, {sort: {name: 1}});
     }
 });
+
+Template.roomHistory.helpers({
+    'versions': function() {
+        var ids = [ this._id ]
+        if (this.room_id) {
+            ids.push(this.room_id);
+        }
+        return RoomHistory.find(
+            {$or: [
+                {     _id: { $in: ids }},
+                { room_id: { $in: ids }}
+            ]}, 
+            {
+                sort: {created: 1},
+                transform: function (room) {
+                    var author = Meteor.users.findOne({ _id: room.author });
+                    if (author) {
+                        room.author = author;
+                    }
+                    return room;
+                }
+            }
+        );
+    }
+});
+
 
 Template.register.events({
     'submit form': function(event){
