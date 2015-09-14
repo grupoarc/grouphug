@@ -1,23 +1,41 @@
 <head>
   <title>grouphug</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <template name="main">
   {{> navbar}}
   {{> yield}}
-  <hr />
 </template>
 
 <template name="navbar">
-  <p>
-  <a href="{{pathFor route="root"}}">GroupHug</a> -
-  <a href="{{pathFor route="roomList"}}">Room List</a> -
-  {{> loginButtons}}
-  </p>
+  <div class="navbar navbar-fixed-top">
+    {{#if currentUser}}
+    <div class="navbar-inner">
+      <a class="brand" href="{{pathFor route="root"}}">GroupHug</a>
+      <a href="{{pathFor route="roomList"}}">Room List</a>
+      <ul class="nav pull-right">
+        <li><a>{{> loginButtons align="right"}}</a></li>
+      </ul>
+    </div>
+    {{else}}
+    <div class="navbar-inner">
+      <a class="brand" href="{{pathFor route="root"}}">GroupHug</a>
+      <ul class="nav pull-right">
+        <li><a>{{> loginButtons align="right"}}</a></li>
+      </ul>
+    </div>
+    <div class="hero-unit">
+      <p>Please login!</p>
+    </div>
+    {{/if}}
+  </div>
 </template>
 
 <template name="root">
-  <h1>Welcome to GroupHug</h1>
+  <div class="hero-unit">
+    <h1>Welcome to GroupHug</h1>
+  </div>
 </template>
 
 <template name="register">
