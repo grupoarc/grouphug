@@ -4,12 +4,12 @@
 </head>
 <body>
   {{> main}}
-  {{> yield}}
 </body>
 
 <template name="main">
   <div class="container">
     {{> navbar}}
+    {{> yield}}
   </div>
 </template>
 
@@ -81,7 +81,7 @@
 <template name="showRoom">
   {{> actions}}
   <h2>{{name}}</h2>
-  {{text}}
+  {{{text}}}
   {{> chat}}
 </template>
 
