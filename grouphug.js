@@ -49,6 +49,7 @@ Router.route('/room/:roomName', function () {
 // create/prepopulate (if necessary) room collection
 Rooms = new Mongo.Collection('rooms');
 RoomHistory = new Mongo.Collection('room_history');
+Messages = new Mongo.Collection('messages');
 
 var roomUpdate = function (room) {
     var oldRoom = Rooms.findOne({ name: room.name });
@@ -189,6 +190,38 @@ Template.navbar.events({
     }
 });
 
+
+// chat functionality
+
+_sendMessage = function(roomname) {
+    var el = document.getElementById("msg");
+    Messages.insert({user: Meteor.user().username, msg: el.value, ts: new Date(), room: roomname});
+    el.value = "";
+    el.focus();
+};
+
+Template.chatInput.events({
+    'click .sendMsg': function(e) {
+        _sendMessage(this.name);
+    },
+    'keyup #msg': function(e) {
+        if (e.type == "keyup" && e.which == 13) {
+            _sendMessage(this.name);
+        }
+    }
+});
+
+Template.chatMessages.helpers({
+    messages: function() {
+        return Messages.find({room: this.name}, {sort: {ts: -1}});
+    }
+});
+  
+Template.chatMessage.helpers({
+    timestamp: function() {
+        return this.ts.toLocaleString();
+    }
+});
 
 
 }

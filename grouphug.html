@@ -59,6 +59,7 @@
   {{> actions}}
   <h2>{{name}}</h2>
   {{text}}
+  {{> chat}}
 </template>
 
 <template name="roomEditor">
@@ -83,4 +84,32 @@
     {{/each}}
   </ul>
 </template>
+
+<template name="chat">
+    <div>
+    {{#if currentUser}}
+    {{> chatInput}}
+    {{/if}}
+    {{> chatMessages}}
+    </div>
+</template>
+
+<template name="chatInput">
+    <input type="text" id="msg" placeholder="Your message goes here..." style="width: 50%; margin-bottom: 0px">
+    <input type="button" value="Send message" class="btn btn-primary sendMsg">
+</template>
+
+<template name="chatMessages">
+    <h4>Room: {{name}}</h4>
+    <div id="messages" style="background-color: #ffffff; border: 1px solid darkgray; max-height: 200px; overflow: auto">
+        {{#each messages}}
+            {{> chatMessage}}
+        {{/each}}
+    </div>
+</template>
+
+<template name="chatMessage">
+    <p><strong>{{user}}</strong> <span style="font-size: 0.7em; color: darkgray">({{timestamp}})</span>: <i>{{msg}}</i></p>
+</template>
+
 
