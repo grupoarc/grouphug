@@ -18,7 +18,9 @@
     {{#if currentUser}}
     <div class="navbar-inner">
       <a class="brand" href="{{pathFor route="root"}}">GroupHug</a>
-      <a href="{{pathFor route="roomList"}}">Room List</a>
+      <ul class="nav pull-left">
+        <li><a href="{{pathFor route="roomList"}}">Rooms</a></li>
+      </ul>
       <ul class="nav pull-right">
         <li><a>{{> loginButtons align="right"}}</a></li>
       </ul>
