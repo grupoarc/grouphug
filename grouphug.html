@@ -2,10 +2,15 @@
   <title>grouphug</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+<body>
+  {{> main}}
+  {{> yield}}
+</body>
 
 <template name="main">
-  {{> navbar}}
-  {{> yield}}
+  <div class="container">
+    {{> navbar}}
+  </div>
 </template>
 
 <template name="navbar">
