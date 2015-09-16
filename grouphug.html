@@ -2,9 +2,6 @@
   <title>grouphug</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-  {{> main}}
-</body>
 
 <template name="main">
   <div class="container">
@@ -15,29 +12,22 @@
 
 <template name="navbar">
   <div class="navbar navbar-fixed-top">
-    {{#if currentUser}}
     <div class="navbar-inner">
       <a class="brand" href="{{pathFor route="root"}}">GroupHug</a>
-      <ul class="nav pull-left">
-        <li><a href="{{pathFor route="roomList"}}">Rooms</a></li>
-      </ul>
-      <a href="{{pathFor route="roomList"}}">Room List</a>
+      {{#if session "meteor_loggedin"}}
+        <ul class="nav pull-left">
+          <li><a href="{{pathFor route="roomList"}}">Rooms</a></li>
+        </ul>
+      {{else}}
+        <div>
+          <p>Please login!</p>
+        </div>
+      {{/if}}
       <ul class="nav pull-right">
         <li><a>{{> loginButtons align="right"}}</a></li>
       </ul>
-    </div>
-    {{else}}
-    <div class="navbar-inner">
-      <a class="brand" href="{{pathFor route="root"}}">GroupHug</a>
-      <ul class="nav pull-right">
-        <li><a>{{> loginButtons align="right"}}</a></li>
-      </ul>
-    </div>
-    <div class="hero-unit">
-      <p>Please login!</p>
-    </div>
-    {{/if}}
-  </div>
+    </div> <!-- navbar-inner -->
+  </div> <!-- navbar-fixed-top -->
 </template>
 
 <template name="root">
@@ -52,7 +42,7 @@
     <p>Email: <input type="email" name="email"></p>
     <p>Password: <input type="password" name="password"></p>
     <p><input type="submit" value="Register"></p>
-  </form> 
+  </form>
 </template>
 
 <template name="login">
@@ -89,7 +79,7 @@
 </template>
 
 <template name="roomEditor">
-  {{#if currentUser}}     
+  {{#if currentUser}}
   {{> actions}}
   <h2>Edit {{name}}:</h2>
     <form>

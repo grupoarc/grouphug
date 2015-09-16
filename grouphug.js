@@ -95,6 +95,14 @@ Accounts.ui.config({
     passwordSignupFields: "USERNAME_AND_OPTIONAL_EMAIL"
 });
 
+Meteor.autorun(function() {
+    Session.set("meteor_loggedin",!!Meteor.user());
+});
+
+Handlebars.registerHelper('session',function(input){
+    return Session.get(input);
+});
+
 Template.roomEditor.events({
     'click .saveRoom': function(event) {
         event.preventDefault();
