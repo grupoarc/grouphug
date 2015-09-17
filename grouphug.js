@@ -1,19 +1,19 @@
 
 // routing
-Router.configure({ 
+Router.configure({
         layoutTemplate: 'main'
 });
 Router.route('/register');
 Router.route('/login');
-Router.route('/', { 
+Router.route('/', {
         template: 'root',
         name: 'root'
 });
-Router.route('/room', { 
+Router.route('/room', {
         template: 'roomList',
-        name: 'roomList' 
+        name: 'roomList'
 });
-Router.route('/rooms', function() { 
+Router.route('/rooms', function() {
         this.redirect('roomList')
 });
 Router.route('/room/:roomName', function () {
@@ -103,25 +103,37 @@ Handlebars.registerHelper('session',function(input){
     return Session.get(input);
 });
 
+var _canEditRoom = function(userId, roomName) {
+  if (!userId) return false;
+  if (roomName.startsWith('__') && !isAdmin(userId.username)) return false;
+  return true;
+}
+  
 Template.roomEditor.events({
     'click .saveRoom': function(event) {
         event.preventDefault();
         var roomName = this.name;
-        var roomText = $('[name=roomText]').val();
+        var roomText = $('#editor').html();
         var currentUserId = Meteor.userId();
-        if ((!currentUserId) ||
-            (roomName.startsWith('__') && !isAdmin(currentUserId.username))) {
-            return; // E_PERM
+        if (_canEditRoom(currentUserId, roomName)) {
+            roomUpdate({
+                name: roomName,
+                text: roomText,
+                created: Date(),
+                author: currentUserId
+            });
         }
-        roomUpdate({
-            name: roomName,
-            text: roomText,
-            created: Date(),
-            author: currentUserId
-        });
         Router.go('room', { roomName: roomName });
     }
 });
+
+Template.roomEditor.rendered = function() {
+    this._editor = new Pen("#editor");
+};
+
+Template.roomEditor.destroyed = function() {
+        this._editor.destroy();
+};
 
 Template.roomList.helpers({
     'rooms': function() {
@@ -139,7 +151,7 @@ Template.roomHistory.helpers({
             {$or: [
                 {     _id: { $in: ids }},
                 { room_id: { $in: ids }}
-            ]}, 
+            ]},
             {
                 sort: {created: 1},
                 transform: function (room) {
@@ -166,7 +178,7 @@ Template.register.events({
         }, function(error) {
             if (error) {
                 console.log(error.reason)
-            } else { 
+            } else {
                 Router.go('root');
             }
             });
@@ -183,7 +195,7 @@ Template.login.events({
         Meteor.loginWithPassword(email, password, function(error) {
             if (error) {
                 console.log(error.reason)
-            } else { 
+            } else {
                 Router.go('root');
             }
             });
@@ -224,7 +236,7 @@ Template.chatMessages.helpers({
         return Messages.find({room: this.name}, {sort: {ts: -1}});
     }
 });
-  
+
 Template.chatMessage.helpers({
     timestamp: function() {
         return this.ts.toLocaleString();

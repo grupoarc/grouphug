@@ -20,7 +20,7 @@
         </ul>
       {{else}}
         <div>
-          <p>Please login!</p>
+          <em>Please login!</em>
         </div>
       {{/if}}
       <ul class="nav pull-right">
@@ -82,9 +82,9 @@
   {{#if currentUser}}
   {{> actions}}
   <h2>Edit {{name}}:</h2>
-    <form>
-      <textarea name="roomText" rows="25" cols="80">{{text}}</textarea>
-    </form>
+    <div id="editor">
+      {{{text}}}
+    </div>
     <button class="saveRoom">Save</button>
   {{else}}
     You must be logged in to edit a page.
