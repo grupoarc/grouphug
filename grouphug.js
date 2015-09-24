@@ -132,7 +132,9 @@ Template.roomEditor.rendered = function() {
 };
 
 Template.roomEditor.destroyed = function() {
-        this._editor.destroy();
+	if (this._editor) {
+            this._editor.destroy();
+	}
 };
 
 Template.roomList.helpers({
