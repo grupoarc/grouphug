@@ -74,6 +74,9 @@
 <template name="showRoom">
   {{> actions}}
   <h2>{{name}}</h2>
+  {{#unless isLatest }}
+  <h3>(as of {{displayDate created}})</h3>
+  {{/unless}}
   {{{text}}}
   {{> chat}}
 </template>
@@ -96,7 +99,8 @@
   <h2>History of {{name}}:</h2>
   <ul>
     {{#each versions}}
-      <li>{{created}} by {{author.username}}</li>
+    <li><a href="{{pathFor route="room" roomName=this.name}}?asof={{created}}">{{displayDate created}}</a> 
+        by {{author.username}}</li>
     {{/each}}
   </ul>
 </template>

@@ -9,24 +9,51 @@ Router.route('/', {
         template: 'root',
         name: 'root'
 });
-Router.route('/room', {
-        template: 'roomList',
+Router.route('/room', function() {
+    if (this.params.query.view == 'history') {
+        this.render('recentChanges');
+    } else {
+        this.render('roomList') 
+    }
+},{
         name: 'roomList'
 });
 Router.route('/rooms', function() {
         this.redirect('roomList')
 });
 Router.route('/room/:roomName', function () {
-    var curRoom = this.params.roomName;
-    var room = Rooms.findOne({ name: curRoom });
+    var roomName = this.params.roomName;
+    var room = undefined;
+    if (this.params.query.asof) {
+        // turn asof into a timestamp
+        var when = moment(this.params.query.asof, 'X');
+        if (!when) {
+            console.log("Invalid date '" + this.params.query.asof + "' specified.");
+        }
+        // query RoomHistory for it
+        room = RoomHistory.findOne({
+            $and: [
+                { name: roomName },
+                { created: { $lte: when.unix() } }
+            ]},
+            { sort: [[ "created", "desc" ]] }
+        );
+        if (!room) {
+            console.log("No room found for date '" + this.params.query.asof + "'");
+        };
+    }
+    if (!room) {
+        // no (valid) timestamp specified, search just by name
+        room = Rooms.findOne({ name: roomName });
+    }
     //console.log("Raw room returned " + room);
     if (!room) {
         room = Rooms.findOne({ name: "__empty_room__" });
         if (!room) {
             console.log("Database not initialized! No __empty_room__ found!");
         } else {
-            room.name = curRoom;
-	}
+            room.name = roomName;
+        }
     }
 
     var renderData = {
@@ -40,7 +67,7 @@ Router.route('/room/:roomName', function () {
     } else if (this.params.query.view === 'history') {
         this.render('roomHistory', renderData);
     } else {
-        this.render('showRoom', renderData);
+       this.render('showRoom', renderData);
     }
 }, {
         name: 'room'
@@ -53,21 +80,22 @@ Messages = new Mongo.Collection('messages');
 
 var roomUpdate = function (room) {
     var oldRoom = Rooms.findOne({ name: room.name });
-    if (oldRoom) {
-        room.room_id = oldRoom.room_id || oldRoom._id;
-        Rooms.update({ _id: oldRoom._id }, room, {upsert: true});
-    } else {
-        Rooms.insert(room)
+    if (!oldRoom) {
+	Rooms.insert(room);
+	oldRoom = Rooms.findOne({ name: room.name });
     }
+    room.room_id = oldRoom.room_id || oldRoom._id;
+    Rooms.update({ _id: oldRoom._id }, room, {upsert: true});
     RoomHistory.insert(room);
 }
+
 if (Meteor.isServer) { // Server-only code below here
 
 if (typeof Rooms.findOne({ name: "__empty_room__" }) === "undefined") {
     var newRoom = {
         name: "__empty_room__",
-        text: 'There is no room here.  You should <a href="?view=edit">create</a> one.',
-        created: Date(),
+        text: 'There is no room here.  You should <a href="?view=editor">create</a> one.',
+        created: moment().unix(),
         author: null
     }
     roomUpdate(newRoom);
@@ -103,6 +131,22 @@ Handlebars.registerHelper('session',function(input){
     return Session.get(input);
 });
 
+
+Template.registerHelper("displayDate", function(date) {
+        return moment(date, "X").format('YYYY/MM/DD HH:mm:ss');
+});
+
+
+Template.showRoom.helpers({
+    'isLatest': function() {
+        var latest = Rooms.findOne({ name: this.name });
+        return (!latest || (
+                (latest.created === this.created) &&
+                (latest.name === this.name)
+               ));
+    }
+});
+
 var _canEditRoom = function(userId, roomName) {
   if (!userId) return false;
   if (roomName.startsWith('__') && !isAdmin(userId.username)) return false;
@@ -119,7 +163,7 @@ Template.roomEditor.events({
             roomUpdate({
                 name: roomName,
                 text: roomText,
-                created: Date(),
+                created: moment().unix(),
                 author: currentUserId
             });
         }
@@ -155,7 +199,7 @@ Template.roomHistory.helpers({
                 { room_id: { $in: ids }}
             ]},
             {
-                sort: {created: 1},
+                sort: {created: -1},
                 transform: function (room) {
                     var author = Meteor.users.findOne({ _id: room.author });
                     if (author) {

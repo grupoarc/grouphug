@@ -26,3 +26,5 @@ ejson
 spacebars
 check
 ecmascript
+momentjs:moment
+accounts-base
