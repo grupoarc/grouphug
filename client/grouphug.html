@@ -17,6 +17,7 @@
       {{#if session "meteor_loggedin"}}
         <ul class="nav pull-left">
           <li><a href="{{pathFor route="roomList"}}">Rooms</a></li>
+          <li><a href="{{pathFor route="roomList"}}?view=history">Changes</a></li>
         </ul>
       {{else}}
         <div>
@@ -59,6 +60,17 @@
   <ul>
     {{#each rooms}}
       <li><a href="/room/{{name}}">{{name}}</a></li>
+    {{/each}}
+  </ul>
+</template>
+
+<template name="allRoomHistory">
+  <h2>Room History</h2>
+  <ul>
+    {{#each roomchanges}}
+    <li><a href="{{pathFor route="room" roomName=this.name}}?asof={{created}}">{{displayDate created}}</a>
+      {{this.author.username}} changed <a href="{{pathFor route="room" roomName=this.name}}">{{name}}</a>
+    </li>
     {{/each}}
   </ul>
 </template>

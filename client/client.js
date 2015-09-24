@@ -8,7 +8,7 @@ Meteor.autorun(function() {
     Session.set("meteor_loggedin",!!Meteor.user());
 });
 
-Handlebars.registerHelper('session',function(input){
+Template.registerHelper('session',function(input){
     return Session.get(input);
 });
 
@@ -57,9 +57,9 @@ Template.roomEditor.rendered = function() {
 };
 
 Template.roomEditor.destroyed = function() {
-	if (this._editor) {
-            this._editor.destroy();
-	}
+    if (this._editor) {
+        this._editor.destroy();
+    }
 };
 
 Template.roomList.helpers({
@@ -68,28 +68,38 @@ Template.roomList.helpers({
     }
 });
 
+
+var history = function(spec_ids) {
+    var ids = spec_ids.filter(function (id) { return id; });
+    var where = {};
+    if (ids.length > 0) {
+        where = {$or: [
+                    {     _id: { $in: ids }},
+                    { room_id: { $in: ids }}
+                ]};
+    };
+    return RoomHistory.find( where, {
+        sort: { created: -1 },
+        transform: function (room) {
+            var author = Meteor.users.findOne({ _id: room.author });
+            if (author) {
+                room.author = author;
+            }
+            return room;
+        }
+    }); 
+    
+};
+
 Template.roomHistory.helpers({
     'versions': function() {
-        var ids = [ this._id ]
-        if (this.room_id) {
-            ids.push(this.room_id);
-        }
-        return RoomHistory.find(
-            {$or: [
-                {     _id: { $in: ids }},
-                { room_id: { $in: ids }}
-            ]},
-            {
-                sort: {created: -1},
-                transform: function (room) {
-                    var author = Meteor.users.findOne({ _id: room.author });
-                    if (author) {
-                        room.author = author;
-                    }
-                    return room;
-                }
-            }
-        );
+        return history([ this._id, this.room_id ]);
+    }
+});
+
+Template.allRoomHistory.helpers({
+    'roomchanges': function() {
+            return history([]);
     }
 });
 
@@ -161,10 +171,7 @@ Template.chatInput.events({
 Template.chatMessages.helpers({
     messages: function() {
         return Messages.find({room: this.name}, {sort: {ts: -1}});
-    }
-});
-
-Template.chatMessage.helpers({
+    },
     timestamp: function() {
         return this.ts.toLocaleString();
     }
