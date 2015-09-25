@@ -97,9 +97,9 @@
   {{#if currentUser}}
   {{> actions}}
   <h2>Edit {{name}}:</h2>
-    <div id="editor">
+    <textarea id="editor" name="editor">
       {{{text}}}
-    </div>
+    </textarea>
     <button class="saveRoom">Save</button>
   {{else}}
     You must be logged in to edit a page.

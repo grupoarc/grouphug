@@ -10,7 +10,6 @@ iron:router
 accounts-password
 accounts-ui
 bootstrap
-djedi:pen
 standard-minifiers
 meteor-base
 mobile-experience
@@ -28,3 +27,4 @@ check
 ecmascript
 momentjs:moment
 accounts-base
+lsun:ckeditor

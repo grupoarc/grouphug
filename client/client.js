@@ -38,7 +38,7 @@ Template.roomEditor.events({
     'click .saveRoom': function(event) {
         event.preventDefault();
         var roomName = this.name;
-        var roomText = $('#editor').html();
+        var roomText = Template.instance()._editor.getData();
         var currentUserId = Meteor.userId();
         if (_canEditRoom(currentUserId, roomName)) {
             roomUpdate({
@@ -52,9 +52,11 @@ Template.roomEditor.events({
     }
 });
 
+
 Template.roomEditor.rendered = function() {
-    this._editor = new Pen("#editor");
+    this._editor = CKEDITOR.replace('editor');
 };
+
 
 Template.roomEditor.destroyed = function() {
     if (this._editor) {
