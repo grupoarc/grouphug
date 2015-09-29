@@ -25,6 +25,9 @@
         </div>
       {{/if}}
       <ul class="nav pull-right">
+	{{#if session "meteor_loggedin"}}
+	<li>{{> searchBox}}</li>
+	{{/if}}	
         <li><a>{{> loginButtons align="right"}}</a></li>
       </ul>
     </div> <!-- navbar-inner -->
@@ -144,4 +147,21 @@
     <p><strong>{{user}}</strong> <span style="font-size: 0.7em; color: darkgray">({{timestamp}})</span>: <i>{{msg}}</i></p>
 </template>
 
+<template name="searchBox">
+  <form id="search" method="get" action="{{pathFor route="searchResults"}}">
+    <input type="text" id="searchValue" value="{{q}}" name="q" />
+    <button id="searchButton">Search</button>
+  </form> 
+</template>
+
+<template name="searchResults">
+  {{> searchBox}}
+  <hr /> 
+  <h2>Results:</h2> 
+  <ol>
+    {{#each roomResults}}
+    <li><a href="{{pathFor route="room" roomName=this.name}}">{{name}}</a></li>
+    {{/each}}
+  </ol>
+</template>
 

@@ -5,13 +5,14 @@ Accounts.ui.config({
 });
 
 Meteor.autorun(function() {
-    Session.set("meteor_loggedin",!!Meteor.user());
+    Session.set("meteor_loggedin", !!Meteor.user());
 });
 
-Template.registerHelper('session',function(input){
+Template.registerHelper('stringify', JSON.stringify);
+
+Template.registerHelper('session', function(input){
     return Session.get(input);
 });
-
 
 Template.registerHelper("displayDate", function(date) {
         return moment(date, "X").format('YYYY/MM/DD HH:mm:ss');
@@ -176,6 +177,29 @@ Template.chatMessages.helpers({
     },
     timestamp: function() {
         return this.ts.toLocaleString();
+    }
+});
+
+
+// search functionality
+
+Template.searchResults.helpers({
+    roomResults: function() {
+        var searchValue = Router.current().params.query.q;
+        Meteor.subscribe("RoomSearch", searchValue);
+        if (searchValue) {
+            return Rooms.find({}, { sort: [["score", "desc"]] });
+        } else {
+            console.log("No searchValue found");
+            return Rooms.find({});
+        }
+    }
+});
+
+Template.searchBox.events({
+    'click #searchButton': function(e) {
+        var searchValue = $('#searchValue').val();
+        Router.go('searchResults', {}, {query: { q: searchValue}});
     }
 });
 
