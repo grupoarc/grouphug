@@ -18,6 +18,7 @@ Template.registerHelper("displayDate", function(date) {
         return moment(date, "X").format('YYYY/MM/DD HH:mm:ss');
 });
 
+Template.registerHelper("isAdmin", isAdmin);
 
 Template.showRoom.helpers({
     'isLatest': function() {

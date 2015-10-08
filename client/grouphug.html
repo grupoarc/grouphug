@@ -25,9 +25,12 @@
         </div>
       {{/if}}
       <ul class="nav pull-right">
-	{{#if session "meteor_loggedin"}}
-	<li>{{> searchBox}}</li>
-	{{/if}}	
+        {{#if session "meteor_loggedin"}}
+        <li>{{> searchBox}}</li>
+          {{#if isAdmin currentUser.username}}
+        <li><a href="{{pathFor route="admin"}}">Admin</a></li>
+          {{/if}}
+      	{{/if}}	
         <li><a>{{> loginButtons align="right"}}</a></li>
       </ul>
     </div> <!-- navbar-inner -->
@@ -56,6 +59,11 @@
       <p>Password: <input type="password" name="password" required></p>
       <p><input type="submit" value="Login"></p>
   </form>
+</template>
+
+<template name="admin">
+<h2>Backup / Restore</h2>
+{{> appDumpUI}}
 </template>
 
 <template name="roomList">
