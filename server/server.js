@@ -1,4 +1,5 @@
 
+/* who's allowed to do application dump and restores */
 appDump.allow = function() {
     return this.user && isAdmin(this.user.username);
 }
