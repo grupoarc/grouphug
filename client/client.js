@@ -20,7 +20,7 @@ Template.registerHelper("displayDate", function(date) {
 
 Template.registerHelper("isAdmin", isAdmin);
 
-Template.showRoom.helpers({
+Template.roomShow.helpers({
     'isLatest': function() {
         var latest = Rooms.findOne({ name: this.name });
         return (!latest || (
