@@ -46,6 +46,7 @@ Template.roomEditor.events({
             roomUpdate({
                 name: roomName,
                 text: roomText,
+                meta: this.meta,
                 created: moment().unix(),
                 author: currentUserId
             });
@@ -55,16 +56,75 @@ Template.roomEditor.events({
 });
 
 
-Template.roomEditor.rendered = function() {
+Template.roomEditor.onRendered(function() {
     this._editor = CKEDITOR.replace('editor');
-};
+});
 
 
-Template.roomEditor.destroyed = function() {
+Template.roomEditor.onDestroyed(function() {
     if (this._editor) {
         this._editor.destroy();
     }
-};
+});
+
+Template.roomMetaEditor.events({
+    'click .saveRoom': function(event) {
+        event.preventDefault();
+        var roomName = this.name;
+        var meta = Template.instance()._editor.getValue();
+        var currentUserId = Meteor.userId();
+        if (_canEditRoom(currentUserId, roomName)) {
+            roomUpdate({
+                name: roomName,
+                text: this.text,
+                meta: meta,
+                created: moment().unix(),
+                author: currentUserId
+            });
+        }
+        Router.go('room', { roomName: roomName });
+    }
+});
+
+Template.roomMetaEditor.onRendered(function() {
+    //var element = $('#metaEditor');
+    var element = document.getElementById('metaEditor');
+
+    var schema = {
+        "title": "Metadata",
+        "type": "object",
+        "properties": {
+            "perms": {
+                "type": "object",
+                "description": "Permissions",
+                "properties": {
+                    "room": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    };
+
+    this._editor = new JSONEditor(element, {
+        schema: schema,
+        theme: 'bootstrap3',
+    });
+
+    this._editor.setValue(this.data.meta);
+
+    this._editor.enable();
+});
+
+Template.roomMetaEditor.onDestroyed(function() {
+    if (this._editor) {
+        this._editor.destroy();
+    }
+});
+
 
 Template.roomList.helpers({
     'rooms': function() {

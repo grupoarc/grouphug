@@ -90,7 +90,9 @@
   <p>
   <a href="{{pathFor route="room" roomName=this.name}}">View</a> -
   <a href="{{pathFor route="room" roomName=this.name}}?view=editor">Edit</a> -
-  <a href="{{pathFor route="room" roomName=this.name}}?view=history">History</a>
+  <a href="{{pathFor route="room" roomName=this.name}}?view=history">History</a> -
+  <a href="{{pathFor route="roomMeta" roomName=this.name}}">Meta</a> -
+  <a href="{{pathFor route="roomMeta" roomName=this.name}}?view=editor">MetaEdit</a>
   </p>
 </template>
 
@@ -104,13 +106,32 @@
   {{> chat}}
 </template>
 
+<template name="showRoomMeta">
+  {{> actions}}
+  <h2>{{name}}</h2>
+  <code>
+  {{stringify meta}}
+  </code>
+</template>
+
 <template name="roomEditor">
   {{#if currentUser}}
-  {{> actions}}
-  <h2>Edit {{name}}:</h2>
+    {{> actions}}
+    <h2>Edit {{name}}:</h2>
     <textarea id="editor" name="editor">
       {{{text}}}
     </textarea>
+    <button class="saveRoom">Save</button>
+  {{else}}
+    You must be logged in to edit a page.
+  {{/if}}
+</template>
+
+<template name="roomMetaEditor">
+  {{#if currentUser}}
+    {{> actions}}
+    <h2>Edit {{name}} Metadata:</h2>
+    <div id="metaEditor" name="metaEditor"></div>
     <button class="saveRoom">Save</button>
   {{else}}
     You must be logged in to edit a page.
