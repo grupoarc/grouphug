@@ -4,6 +4,14 @@ appDump.allow = function() {
     return this.user && isAdmin(this.user.username);
 }
 
+/* who's allowed to upload files */
+Files.allow({
+    'insert': function () {
+        return this.user;
+    }
+});
+
+
 if (typeof Rooms.findOne({ name: "__empty_room__" }) === "undefined") {
     var newRoom = {
         name: "__empty_room__",

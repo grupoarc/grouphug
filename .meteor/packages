@@ -30,3 +30,5 @@ accounts-base
 lsun:ckeditor
 hitchcott:app-dump
 cunneen:json-editor
+cfs:filesystem
+cfs:standard-packages

@@ -20,6 +20,24 @@ Template.registerHelper("displayDate", function(date) {
 
 Template.registerHelper("isAdmin", isAdmin);
 
+
+Template.roomFilesShow.helpers({
+    'roomFiles': function() {
+        var roomName = this.name;
+        var room = Rooms.findOne({ name: roomName });
+        var files = new Array();
+        if (!room || !room.contents) return files;
+        for (let item of room.contents) {
+            var f = Files.findOne( { _id: item } );
+            if (f) {
+                files.push(f);
+            }
+        }
+        return files;
+    }
+});
+
+
 Template.roomShow.helpers({
     'isLatest': function() {
         var latest = Rooms.findOne({ name: this.name });
@@ -29,6 +47,28 @@ Template.roomShow.helpers({
                ));
     }
 });
+
+Template.roomAddFile.events({
+    'change .roomAddFileName': function(event, template) {
+        event.preventDefault();
+        var roomName = this.name;
+        var currentUserId = Meteor.userId();
+        if (_canEditRoom(currentUserId, roomName)) {
+            // var files = document.getElementById('roomAddFileName');
+            var files = event;
+            FS.Utility.eachFile(files, function(file) {
+                Files.insert(file, function (err, fileObj) {
+                    //If !err, we have inserted new doc with ID fileObj._id, and
+                    //kicked off the data upload using HTTP
+                    //so save it in the room
+                    roomAddContents(roomName, [ fileObj._id ]); 
+                }); 
+            });
+        }
+        Router.go('room', { roomName: roomName });
+    }
+});
+
 
 var _canEditRoom = function(userId, roomName) {
   if (!userId) return false;
@@ -46,7 +86,6 @@ Template.roomEditor.events({
             roomUpdate({
                 name: roomName,
                 text: roomText,
-                meta: this.meta,
                 created: moment().unix(),
                 author: currentUserId
             });

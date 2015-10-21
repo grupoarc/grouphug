@@ -92,8 +92,21 @@
   <a href="{{pathFor route="room" roomName=this.name}}?view=editor">Edit</a> -
   <a href="{{pathFor route="room" roomName=this.name}}?view=history">History</a> -
   <a href="{{pathFor route="roomMeta" roomName=this.name}}">Meta</a> -
-  <a href="{{pathFor route="roomMeta" roomName=this.name}}?view=editor">MetaEdit</a>
+  <a href="{{pathFor route="roomMeta" roomName=this.name}}?view=editor">MetaEdit</a> -
+  <a href="{{pathFor route="roomContents" roomName=this.name}}">Contents</a>
   </p>
+</template>
+
+
+<template name="roomFilesShow">
+{{#if roomFiles }}
+  <h3>Files:</h3>
+  <ul>
+    {{#each roomFiles}}
+    <li>{{name}}</li>
+    {{/each}}
+  </ul>
+{{/if}}
 </template>
 
 <template name="roomShow">
@@ -102,7 +115,9 @@
   {{#unless isLatest }}
   <h3>(as of {{displayDate created}})</h3>
   {{/unless}}
+  <!--  <hr>Contents: {{stringify contents}} <hr> -->
   {{{text}}}
+  {{> roomFilesShow}}
   {{> chat}}
 </template>
 
@@ -112,6 +127,13 @@
   <code>
   {{stringify meta}}
   </code>
+</template>
+
+<template name="roomAddFile">
+  {{> actions}}
+  <h2>Attach a file:</h2>
+  {{> roomFilesShow}}
+  <input type="file" name="roomAddFileName" class="roomAddFileName">
 </template>
 
 <template name="roomEditor">
